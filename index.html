@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplecode Bookmarks</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            color: #333; /* Text color */
+        }
+        h1, h2 {
+            color: #333; /* Text color */
+        }
+        .container {
+            background-color: #fff; /* White background */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+		
+        .btn-primary {
+            background-color: #333; /* Dark button color */
+            border-color: #333; /* Dark button border color */
+            color: #fff; /* Button text color */
+        }
+        .list-group-item {
+            color: #fff; /* List item text color */
+        }
+
+		body {
+		  background-color: unset;
+		  background-image: url('assets/img/bg_dotted.png');
+		}
+
+		.form-control {
+		  background-color: unset;
+		  box-shadow: 0px 1px 5px #bbb;
+		  box-shadow: 0px 1px 5px #bbb;
+		}
+
+		.list-group-item {
+		  background-color: unset;
+		  color: black;
+		}
+
+		.container {
+		  box-shadow: 0px 1px 5px #bbb;
+		}
+
+		.btn-primary {
+		  box-shadow: 0px 1px 5px #bbb;
+		}
+
+		.btn:not(:disabled):not(.disabled) {
+		  box-shadow: 0px 1px 5px #bbb;
+		}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simplecode Bookmarks</h1>
+        
+		<br>
+		
+        <h2>Tags</h2>
+        <!-- Search bar for Tags -->
+        <input type="text" id="tagsSearch" class="form-control mb-3" placeholder="Search Tags">
+        <div id="tagsPanel">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#tagsCollapse">Toggle Tags</button>
+            <div id="tagsCollapse" class="collapse">
+                <ul id="tags" class="list-group">
+                    <!-- Tags will be populated here -->
+                </ul>
+            </div>
+        </div>
+		
+
+		<br>
+
+        <h2>Links</h2>
+        <!-- Search bar for Links -->
+        <input type="text" id="linksSearch" class="form-control mb-3" placeholder="Search Links">
+		<div id="linksPanel">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#linksCollapse">Toggle Links</button>
+			<button id="linksShuffleBtn" class="btn btn-primary" type="button">Shuffle Links</button>
+            <div id="linksCollapse" class="show">
+                <ul id="links" class="list-group">
+                    <!-- Tags will be populated here -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap and jQuery JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Sample JSON data
+		
+		function fetchJSON(url) {
+			return fetch(url)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return response.json();
+				});
+		}
+
+		const sourcesUrl = 'sources.json';
+		
+		fetchJSON(sourcesUrl).then(sourcesData => {
+			sourcesData.sources.forEach((sourcesItem) => {
+				fetchJSON(sourcesItem).then(sourcesItemData => {
+					populateTags(sourcesItemData);
+					populateLinks(sourcesItemData);
+					linksShuffle();
+				}).catch(error => {
+					console.error('Error:', error);
+				});
+			});
+		}).catch(error => {
+			console.error('Error:', error);
+		});
+
+		let populateTagsHistory = [];
+        // Function to populate Tags
+        function populateTags(sourceItemData) {
+            const tagsList = document.getElementById("tags");
+            sourceItemData.Tags.forEach((tag, index) => {
+				if (!populateTagsHistory.includes(tag)) {
+					const li = document.createElement("li");
+					li.className = "list-group-item";
+					li.textContent = tag;
+					
+					tagsList.appendChild(li);
+					
+					populateTagsHistory.push(tag);
+				}
+            });
+        }
+
+        // Function to populate Links
+        function populateLinks(sourceItemData) {
+            const linksContainer = document.getElementById("links");
+			
+            sourceItemData.Links.forEach((link) => {
+                const linkDiv = document.createElement("li");
+				linkDiv.className = "list-group-item";
+                linkDiv.innerHTML = `
+                    <h3>${link.Name}</h3>
+					<p><i>Posted by ${link.Poster}</i></p>
+                    <p><a href="${link.Link}" target="_blank">${link.Link}</a></p>
+                    <p>Tags: ${link.Tags.map(tagIndex => sourceItemData.Tags[tagIndex]).join(", ")}</p>
+                `;
+                linksContainer.appendChild(linkDiv);
+            });
+        }
+
+        // Function to handle search for Tags
+        function searchTags() {
+            const searchValue = document.getElementById("tagsSearch").value.toLowerCase();
+            const tagsList = document.getElementById("tags");
+
+            for (let i = 0; i < tagsList.children.length; i++) {
+                const tag = tagsList.children[i];
+                const tagText = tag.textContent.toLowerCase();
+                if (tagText.includes(searchValue)) {
+                    tag.style.display = "block";
+                } else {
+                    tag.style.display = "none";
+                }
+            }
+			
+			// Check if the Links panel is collapsed, and expand it if it is
+			const tagsCollapse = document.getElementById("tagsCollapse");
+			if (tagsCollapse.classList.contains("collapse")) {
+				tagsCollapse.classList.remove("collapse");
+			}
+        }
+
+        // Function to handle search for Links
+        function searchLinks() {
+			const searchValue = document.getElementById("linksSearch").value.toLowerCase();
+			const linksContainer = document.getElementById("links");
+
+			for (let i = 0; i < linksContainer.children.length; i++) {
+				const linkDiv = linksContainer.children[i];
+				const linkText = linkDiv.textContent.toLowerCase();
+				if (linkText.includes(searchValue)) {
+					linkDiv.style.display = "block";
+				} else {
+					linkDiv.style.display = "none";
+				}
+			}
+
+			// Check if the Links panel is collapsed, and expand it if it is
+			const linksCollapse = document.getElementById("linksCollapse");
+			if (linksCollapse.classList.contains("collapse")) {
+				linksCollapse.classList.remove("collapse");
+			}
+        }
+		
+		// Add event listeners for search bars
+        document.getElementById("tagsSearch").addEventListener("input", searchTags);
+        document.getElementById("linksSearch").addEventListener("input", searchLinks);
+
+        function linksShuffle() {
+            let rows = Array.from(document.getElementById("links").getElementsByTagName('li'));
+			
+			for (let i = rows.length - 1; i > 0; i--) {
+                let randomness = Math.floor(Math.random() * (i + 1));
+                [rows[i], rows[randomness]] = [rows[randomness], rows[i]];
+            }
+
+            for (const row of rows) {
+                document.getElementById("links").appendChild(row);
+            }
+        }
+		
+		document.getElementById("linksShuffleBtn").addEventListener("click", linksShuffle);
+    </script>
+</body>
+</html>

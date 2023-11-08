@@ -1,0 +1,15 @@
+{
+	"Tags" : [
+		"Example Tag"
+	],
+	"Links" : [
+	  {
+		"Name": "Example Link",
+		"Link": "https://www.simplecode.gr",
+		"Poster" : "Example Poster 2",
+		"Tags": [
+		  0
+		]
+	  }
+	]
+}

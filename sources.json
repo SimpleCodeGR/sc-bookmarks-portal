@@ -1,0 +1,7 @@
+{
+	"sources" : [
+		"LinksExample.json",
+		"LinksExample2.json",
+		"https://raw.githubusercontent.com/rept0id/notes/main/Links/Links.json"
+	]
+}
